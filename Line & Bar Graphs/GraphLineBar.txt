@@ -1,0 +1,244 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package oopsojharo;
+
+
+
+
+
+
+
+
+
+import java.applet.Applet;
+import java.awt.AWTEvent;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Panel;
+import java.awt.TextField;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.TextEvent;
+import java.util.Random;
+
+public class GraphLine extends Applet {
+	GraphArea area;
+	GraphControls controls;
+
+	public void init()
+	{
+		setLayout(new BorderLayout());
+
+		this.setSize(440, 410);
+		area=new GraphArea();
+		add("Center", area);
+		add("South", controls=new GraphControls(area));
+	}
+
+        public void destroy() {
+		remove(controls);
+		remove(area);
+	}
+
+	public void start() {
+		controls.setEnabled(true);
+	}
+
+	public void stop() {
+		controls.setEnabled(false);
+	}
+}
+
+class GraphArea extends Canvas
+{
+	int inputLength;
+	int graphOption=1;
+	int []y=new int[10];
+	boolean generateData=false;
+	Random r=new Random();
+	final int GAP=2;
+
+	public int screenX(int x) //scaling of x
+	{
+		return 30+(x*20);
+	}
+
+	public int screenY(int y) //scaling of y
+	{
+		return 330-(y*20);
+	}
+
+	public void randomData()
+	{
+		for(int i=0; i<10; i++)
+		{
+			y[i]=r.nextInt(15);
+		}
+	}
+
+	public void redraw(int inputLength, int graphOption, boolean generateData) {
+		this.generateData=generateData;
+		if(this.generateData==true)
+		{
+			randomData();
+			this.generateData=false;
+		}
+
+		this.inputLength=inputLength;
+		this.graphOption=graphOption;
+		repaint();
+	}
+
+	public void paint(Graphics g)
+	{
+		g.drawRect(29, 29, 301, 301);
+		g.setColor(Color.blue);
+		g.fillRect(30, 30, 300, 300);
+		g.setColor(Color.black);
+		for(int i=1; i<15; i++)g.drawLine(screenX(i), 30, screenX(i), 330);
+		for(int i=1; i<15; i++)g.drawLine(30, screenY(i), 330, screenY(i));
+
+		if(graphOption==1 && inputLength<=7)
+		{
+			g.setColor(Color.yellow);
+
+			for(int d=1, i=0; d<=inputLength; d++, i++)
+			{
+				for(int k=screenY(y[i]); k<screenY(0); k++)
+					g.drawLine(screenX(i+1+d), k, screenX(d+2+i), k);
+			}
+		}
+		else if(graphOption==2 && inputLength<=7)
+		{
+			g.setColor(Color.yellow);
+
+			//intial line
+			if(inputLength!=0)
+				g.drawLine(screenX(0), screenY(0), screenX(GAP),
+						screenY(y[0]));
+
+			//This will draw the line of the line Graph
+			for(int i=0, j=GAP; i<inputLength; i++, j=j+GAP)
+			{
+				if(i<inputLength-1)
+					g.drawLine(screenX(j), screenY(y[i]), screenX(j+2),
+							screenY(y[i+1]));
+			}
+
+	///		g.setColor(Color.yellow);
+	//		g.fillOval(90, 90, 180, 180);
+	//		g.setColor(Color.red);
+	//		g.drawLine(180, 180, 270, 180);
+
+		//	g.drawLine(180, 180, (int)(185*Math.cos(30*3.14/180)), (int)(185*Math.sin(30*3.14/180)));
+		//	g.drawLine(180, 180, (int)(185*Math.cos(45*3.14/180)), (int)(185*Math.sin(45*3.14/180)));
+		}
+		else if(graphOption==3 && inputLength<=7)
+		{
+			g.setColor(Color.yellow);
+
+			for(int d=1, i=0; d<=inputLength; d++, i++)
+			{
+				for(int k=screenY(y[i]); k<screenY(0); k++)
+					g.drawLine(screenX(i+1+d), k, screenX(d+2+i), k);
+			}
+			g.setColor(Color.white);
+
+			//intial line
+			if(inputLength!=0)
+				g.drawLine(screenX(0), screenY(0), screenX(GAP),
+						screenY(y[0]));
+
+			//This will draw the line of the line Graph
+			for(int i=0, j=GAP; i<inputLength; i++, j=j+GAP)
+			{
+				if(i<inputLength-1)
+					g.drawLine(screenX(j), screenY(y[i]), screenX(j+2),
+							screenY(y[i+1]));
+			}
+		}
+		else
+		{
+			g.setColor(Color.yellow);
+			g.drawString("Invalid number or number out of bounds", screenX(2), screenY(7));
+		}
+
+		g.setColor(Color.black);
+		g.drawLine(30, 330, 310, 330);
+
+		// this is to give the numbers on the axis of the graph
+		g.setColor(Color.black);
+		for(int i=0; i<=15; i++)g.drawString(Integer.toString(i), screenX(i), 352);
+		for(int i=0; i<=15; i++)g.drawString(Integer.toString(i), 10, screenY(i));
+	}
+}
+
+class GraphControls extends Panel implements ActionListener
+{
+	TextField inputUser;
+	GraphArea area;
+	Button b1;
+	Button b2;
+	Button b3;
+	Button b4;
+
+	public GraphControls(GraphArea area)
+	{
+		b4=new Button("Generate Random Data");
+		b4.addActionListener(this);
+		add(b4);
+
+		this.area = area;
+		add(inputUser = new TextField("6", 4));
+
+		b1 = new Button("Bar Graph");
+		b1.addActionListener(this);
+		add(b1);
+		b2 = new Button("Line Graph");
+		b2.addActionListener(this);
+		add(b2);
+		b3 = new Button("Both");
+		b3.addActionListener(this);
+		add(b3);
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		int start, graphOption=3;
+		boolean generateData=false;
+
+		try {
+			start = Integer.parseInt(inputUser.getText().trim());
+		}catch (NumberFormatException nfe) {
+			start = 0;
+		}
+
+		if(e.getSource() == b1)
+		{
+			graphOption=1;
+		}
+		else if(e.getSource() == b2)
+		{
+			graphOption=2;
+		}
+		else if(e.getSource() == b3)
+		{
+			graphOption=3;
+		}
+		else if(e.getSource() == b4)
+		{
+			generateData=true;
+		}
+		area.redraw(start, graphOption, generateData);
+	}
+}
+
+
